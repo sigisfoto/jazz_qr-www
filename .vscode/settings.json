@@ -1,0 +1,11 @@
+{
+    "editor.semanticTokenColorCustomizations": {
+        "rules": {
+            "variable.readonly:python": "#4EC9B0"
+        }
+    },
+    "workbench.colorCustomizations": {
+        "statusBar.background": "#1e3a5f",
+        "statusBar.foreground": "#ffffff"
+    }
+}

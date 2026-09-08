@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Eksponato Audio Gidas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="container">
+        <div id="error-message" class="error hidden" aria-live="polite"></div>
+        <div id="media-container" class="hidden">
+            <div class="image-wrapper">
+                <img id="exhibit-image" src="" alt="Eksponato nuotrauka">
+            </div>
+            <div class="controls">
+                <button id="play-pause-btn" aria-label="Paleisti audio" class="control-btn">
+                    <!-- Play icon -->
+                    <svg id="icon-play" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5v14l11-7z" />
+                    </svg>
+                    <!-- Pause icon -->
+                    <svg id="icon-pause" viewBox="0 0 24 24" fill="currentColor" class="hidden">
+                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                    </svg>
+                </button>
+                <div id="audio-error-message" class="audio-error hidden" aria-live="polite"></div>
+            </div>
+        </div>
+    </main>
+    <script src="app.js"></script>
+</body>
+</html>

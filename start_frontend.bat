@@ -1,0 +1,3 @@
+@echo off
+echo Paleidžiamas vietinis serveris eksponato puslapio testavimui...
+pnpm dlx serve . -p 3000
