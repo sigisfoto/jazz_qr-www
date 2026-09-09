@@ -70,7 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
     exhibitImage.src = currentExhibit.image;
     exhibitImage.alt = currentExhibit.alt;
     const pageTitle = `${currentExhibit.id}. ${currentExhibit.alt}`;
-    const pagePath = window.location.pathname + window.location.search;
+    const basePath = window.location.pathname.endsWith('/') ? window.location.pathname : window.location.pathname + '/';
+    const pagePath = `${basePath}foto-${currentExhibit.id}`;
     document.title = `${pageTitle} | Vilnius Jazz`;
 
     // Google Analytics (GA4) peržiūros įvykiai su konkrečiu muzikantu ir keliu
