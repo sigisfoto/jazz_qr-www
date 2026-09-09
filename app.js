@@ -72,13 +72,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const pageTitle = `${currentExhibit.id}. ${currentExhibit.alt}`;
     const basePath = window.location.pathname.endsWith('/') ? window.location.pathname : window.location.pathname + '/';
     const pagePath = `${basePath}foto-${currentExhibit.id}`;
+    const virtualLocation = `${window.location.origin}${pagePath}`;
     document.title = `${pageTitle} | Vilnius Jazz`;
 
     // Google Analytics (GA4) peržiūros įvykiai su konkrečiu muzikantu ir keliu
     if (typeof gtag === 'function') {
         gtag('event', 'page_view', {
             page_title: pageTitle,
-            page_location: window.location.href,
+            page_location: virtualLocation,
             page_path: pagePath
         });
 
