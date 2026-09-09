@@ -18,19 +18,20 @@ body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     overflow: hidden;
     height: 100dvh;
+    width: 100vw;
     display: flex;
     justify-content: center;
     align-items: center;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .container {
     width: 100%;
     max-width: 100%;
     height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
+    position: relative;
+    overflow: hidden;
     padding: 0;
     margin: 0;
 }
@@ -40,34 +41,42 @@ body {
 }
 
 .error {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 420px;
     color: var(--error-color);
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     text-align: center;
-    padding: 20px;
-    margin: auto;
-    background: rgba(255, 82, 82, 0.1);
-    border-radius: 8px;
-    border: 1px solid rgba(255, 82, 82, 0.3);
+    padding: 24px;
+    background: rgba(18, 18, 18, 0.9);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 82, 82, 0.35);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 50;
 }
 
 #media-container {
     width: 100%;
     height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0;
+    position: relative;
+    overflow: hidden;
 }
 
+/* 1. Nuotrauka per visą telefono ekraną (nėra jokių atskirtų apatinių juostų) */
 .image-wrapper {
+    position: absolute;
+    inset: 0;
     width: 100%;
-    flex: 1;
-    min-height: 0; /* Leidžia flexbox vaikui susitraukti ir pilnai prisitaikyti */
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 12px 8px 4px 8px;
+    z-index: 1;
 }
 
 #exhibit-image {
@@ -76,33 +85,62 @@ body {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
-    background-color: transparent; /* Jokių pilkų fonų/tarpų */
+    background-color: transparent;
+    display: block;
 }
 
-.controls {
-    width: 100%;
+/* 2. Fullscreen / Išėjimo "X" mygtukas viršuje dešinėje */
+.fullscreen-btn {
+    position: absolute;
+    top: calc(16px + env(safe-area-inset-top, 0px));
+    right: calc(16px + env(safe-area-inset-right, 0px));
+    z-index: 25;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 8px;
-    padding: 8px 16px calc(12px + env(safe-area-inset-bottom, 0px)) 16px;
-    flex-shrink: 0;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
 }
 
-.audio-error {
-    color: var(--error-color);
-    font-size: 0.85rem;
-    text-align: center;
-    background: rgba(255, 82, 82, 0.12);
-    padding: 6px 14px;
-    border-radius: 6px;
-    border: 1px solid rgba(255, 82, 82, 0.25);
+.fullscreen-btn:hover {
+    background: rgba(0, 0, 0, 0.8);
+    transform: scale(1.08);
+}
+
+.fullscreen-btn:active {
+    transform: scale(0.92);
+}
+
+.fullscreen-btn svg {
+    width: 22px;
+    height: 22px;
+}
+
+/* 3. Valdiklis tiesiai ant pačios nuotraukos (overlay) */
+.controls {
+    position: absolute;
+    bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    z-index: 20;
+    pointer-events: none; /* Leidžia liesti nuotrauką aplink mygtuką */
 }
 
 .control-btn {
+    pointer-events: auto;
     background-color: var(--accent-color);
     color: var(--bg-color);
     border: none;
@@ -113,32 +151,46 @@ body {
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease;
-    /* Touch target exceed 48x48 */
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease, box-shadow 0.2s ease;
     min-width: 48px;
     min-height: 48px;
     padding: 18px;
-    box-shadow: 0 4px 12px rgba(29, 185, 84, 0.3);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.7), 0 0 16px rgba(29, 185, 84, 0.4);
 }
 
 .control-btn:hover {
     background-color: var(--accent-hover);
-    transform: scale(1.05);
+    transform: scale(1.06);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.8), 0 0 22px rgba(30, 215, 96, 0.55);
 }
 
 .control-btn:active {
-    transform: scale(0.95);
+    transform: scale(0.94);
 }
 
 .control-btn:disabled {
-    opacity: 0.4;
+    opacity: 0.45;
     cursor: not-allowed;
-    background-color: #555;
-    box-shadow: none;
+    background-color: #444;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     transform: none;
 }
 
 .control-btn svg {
     width: 36px;
     height: 36px;
+}
+
+.audio-error {
+    pointer-events: auto;
+    color: var(--error-color);
+    font-size: 0.85rem;
+    text-align: center;
+    background: rgba(18, 18, 18, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 82, 82, 0.35);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }

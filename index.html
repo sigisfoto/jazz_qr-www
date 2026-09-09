@@ -2,7 +2,11 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#121212">
     <title>Eksponato Audio Gidas</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -10,6 +14,17 @@
     <main class="container">
         <div id="error-message" class="error hidden" aria-live="polite"></div>
         <div id="media-container" class="hidden">
+            <!-- Fullscreen / Exit X mygtukas -->
+            <button id="fullscreen-btn" class="fullscreen-btn" aria-label="Visas ekranas">
+                <!-- Viso ekrano piktograma -->
+                <svg id="icon-fs-enter" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                </svg>
+                <!-- Išėjimo X piktograma -->
+                <svg id="icon-fs-exit" viewBox="0 0 24 24" fill="currentColor" class="hidden">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+            </button>
             <div class="image-wrapper">
                 <img id="exhibit-image" src="" alt="Eksponato nuotrauka">
             </div>

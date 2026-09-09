@@ -81,16 +81,151 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let isPlaying = false;
 
-    // 5. Toggle play/pause
-    playPauseBtn.addEventListener('click', () => {
+    // ==========================================
+    // 5. Fullscreen valdymas ir "X" mygtukas
+    // ==========================================
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    const iconFsEnter = document.getElementById('icon-fs-enter');
+    const iconFsExit = document.getElementById('icon-fs-exit');
+
+    const isFullscreen = () => {
+        return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+    };
+
+    const enterFullscreen = () => {
+        const docEl = document.documentElement;
+        try {
+            if (docEl.requestFullscreen) {
+                docEl.requestFullscreen().catch(() => {});
+            } else if (docEl.webkitRequestFullscreen) {
+                docEl.webkitRequestFullscreen();
+            } else if (docEl.mozRequestFullScreen) {
+                docEl.mozRequestFullScreen();
+            } else if (docEl.msRequestFullscreen) {
+                docEl.msRequestFullscreen();
+            }
+        } catch (e) {
+            console.log("Fullscreen not supported or blocked:", e);
+        }
+    };
+
+    const exitFullscreen = () => {
+        try {
+            if (document.exitFullscreen) {
+                document.exitFullscreen().catch(() => {});
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+        } catch (e) {
+            console.log("Exit fullscreen error:", e);
+        }
+    };
+
+    const updateFullscreenUI = () => {
+        if (isFullscreen()) {
+            iconFsEnter.classList.add('hidden');
+            iconFsExit.classList.remove('hidden');
+            fullscreenBtn.setAttribute('aria-label', 'Išeiti iš viso ekrano');
+        } else {
+            iconFsExit.classList.add('hidden');
+            iconFsEnter.classList.remove('hidden');
+            fullscreenBtn.setAttribute('aria-label', 'Visas ekranas');
+        }
+    };
+
+    fullscreenBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (isFullscreen()) {
+            exitFullscreen();
+        } else {
+            enterFullscreen();
+        }
+    });
+
+    ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'].forEach(evt => {
+        document.addEventListener(evt, updateFullscreenUI);
+    });
+
+    // Automatiškai bandome įjungti fullscreen ir wake lock po pirmo vartotojo paspaudimo bet kur ekrane
+    let hasAttemptedAutoFullscreen = false;
+    const handleFirstUserGesture = (e) => {
+        // Paprašome ekrano neužmigdymo
+        requestWakeLock();
+
+        if (!hasAttemptedAutoFullscreen) {
+            if (e.target.closest('#fullscreen-btn')) return; // Jei spaudė tiesiai ant valdymo mygtuko
+            hasAttemptedAutoFullscreen = true;
+            if (!isFullscreen()) {
+                enterFullscreen();
+            }
+        }
+    };
+
+    document.body.addEventListener('click', handleFirstUserGesture);
+    document.body.addEventListener('touchend', handleFirstUserGesture, { passive: true });
+
+    // ==========================================
+    // 6. Screen Wake Lock API (kad telefonas neužgestų)
+    // ==========================================
+    let wakeLock = null;
+
+    const requestWakeLock = async () => {
+        if ('wakeLock' in navigator) {
+            try {
+                if (wakeLock === null) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    wakeLock.addEventListener('release', () => {
+                        wakeLock = null;
+                    });
+                }
+            } catch (err) {
+                console.log('Wake Lock info:', err);
+            }
+        }
+    };
+
+    const releaseWakeLock = async () => {
+        if (wakeLock !== null) {
+            try {
+                await wakeLock.release();
+                wakeLock = null;
+            } catch (err) {
+                // ignore
+            }
+        }
+    };
+
+    // Kai vartotojas sugrįžta į naršyklės skirtuką, atnaujiname Wake Lock
+    document.addEventListener('visibilitychange', async () => {
+        if (document.visibilityState === 'visible') {
+            await requestWakeLock();
+        } else {
+            await releaseWakeLock();
+        }
+    });
+
+    // ==========================================
+    // 7. Toggle play/pause ir audio valdymas
+    // ==========================================
+    playPauseBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
         if (playPauseBtn.disabled) return;
+
+        // Taip pat užtikriname fullscreen ir wakelock
+        if (!isFullscreen()) {
+            enterFullscreen();
+        }
+        requestWakeLock();
 
         if (isPlaying) {
             audio.pause();
         } else {
-            // Require explicit user interaction to initiate playback
-            audio.play().catch(e => {
-                console.error("Playback failed:", e);
+            audio.play().catch(err => {
+                console.error("Playback failed:", err);
                 showAudioError("Nepavyko paleisti audio. Patikrinkite naršyklės nustatymus.");
             });
         }
@@ -102,6 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
         iconPlay.classList.add('hidden');
         iconPause.classList.remove('hidden');
         playPauseBtn.setAttribute('aria-label', 'Sustabdyti audio');
+        requestWakeLock();
     });
 
     // Update UI on pause
@@ -112,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
         playPauseBtn.setAttribute('aria-label', 'Paleisti audio');
     });
 
-    // 6. Bind the 'ended' event
+    // 8. Bind the 'ended' event
     audio.addEventListener('ended', () => {
         audio.currentTime = 0;
         isPlaying = false;
