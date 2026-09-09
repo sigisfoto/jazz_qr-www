@@ -69,6 +69,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // 4. Setup media
     exhibitImage.src = currentExhibit.image;
     exhibitImage.alt = currentExhibit.alt;
+    document.title = `${currentExhibit.id}. ${currentExhibit.alt} | Vilnius Jazz`;
+
+    // Google Analytics (GA4) peržiūros įvykis
+    if (typeof gtag === 'function') {
+        gtag('event', 'exhibit_view', {
+            exhibit_id: currentExhibit.id,
+            exhibit_name: currentExhibit.alt,
+            page_title: `${currentExhibit.id}. ${currentExhibit.alt}`
+        });
+    }
     
     // Check if image loads properly
     exhibitImage.onerror = () => {
@@ -276,6 +286,14 @@ document.addEventListener('DOMContentLoaded', () => {
         iconPause.classList.remove('hidden');
         playPauseBtn.setAttribute('aria-label', 'Sustabdyti audio');
         requestWakeLock();
+
+        // Google Analytics grojimo įvykis
+        if (typeof gtag === 'function') {
+            gtag('event', 'audio_play', {
+                exhibit_id: currentExhibit.id,
+                exhibit_name: currentExhibit.alt
+            });
+        }
     });
 
     // Update UI on pause
@@ -293,5 +311,13 @@ document.addEventListener('DOMContentLoaded', () => {
         iconPause.classList.add('hidden');
         iconPlay.classList.remove('hidden');
         playPauseBtn.setAttribute('aria-label', 'Paleisti audio');
+
+        // Google Analytics perklausos pabaigos įvykis
+        if (typeof gtag === 'function') {
+            gtag('event', 'audio_completed', {
+                exhibit_id: currentExhibit.id,
+                exhibit_name: currentExhibit.alt
+            });
+        }
     });
 });
