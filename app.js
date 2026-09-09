@@ -69,14 +69,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // 4. Setup media
     exhibitImage.src = currentExhibit.image;
     exhibitImage.alt = currentExhibit.alt;
-    document.title = `${currentExhibit.id}. ${currentExhibit.alt} | Vilnius Jazz`;
+    const pageTitle = `${currentExhibit.id}. ${currentExhibit.alt}`;
+    const pagePath = window.location.pathname + window.location.search;
+    document.title = `${pageTitle} | Vilnius Jazz`;
 
-    // Google Analytics (GA4) peržiūros įvykis
+    // Google Analytics (GA4) peržiūros įvykiai su konkrečiu muzikantu ir keliu
     if (typeof gtag === 'function') {
+        gtag('event', 'page_view', {
+            page_title: pageTitle,
+            page_location: window.location.href,
+            page_path: pagePath
+        });
+
         gtag('event', 'exhibit_view', {
             exhibit_id: currentExhibit.id,
             exhibit_name: currentExhibit.alt,
-            page_title: `${currentExhibit.id}. ${currentExhibit.alt}`
+            page_title: pageTitle,
+            page_path: pagePath
         });
     }
     
