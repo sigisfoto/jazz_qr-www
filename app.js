@@ -92,37 +92,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
     };
 
-    const enterFullscreen = () => {
-        const docEl = document.documentElement;
-        try {
-            if (docEl.requestFullscreen) {
-                docEl.requestFullscreen().catch(() => {});
-            } else if (docEl.webkitRequestFullscreen) {
-                docEl.webkitRequestFullscreen();
-            } else if (docEl.mozRequestFullScreen) {
-                docEl.mozRequestFullScreen();
-            } else if (docEl.msRequestFullscreen) {
-                docEl.msRequestFullscreen();
-            }
-        } catch (e) {
-            console.log("Fullscreen not supported or blocked:", e);
+    const showNotice = (msg) => {
+        let toast = document.getElementById('notice-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'notice-toast';
+            toast.style.cssText = 'position: fixed; top: 70px; left: 50%; transform: translateX(-50%); background: rgba(20,20,20,0.92); color: #fff; padding: 10px 18px; border-radius: 8px; font-size: 0.85rem; z-index: 100; border: 1px solid rgba(255,255,255,0.25); max-width: 90%; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.6); pointer-events: none; transition: opacity 0.3s;';
+            document.body.appendChild(toast);
         }
-    };
-
-    const exitFullscreen = () => {
-        try {
-            if (document.exitFullscreen) {
-                document.exitFullscreen().catch(() => {});
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            } else if (document.mozCancelFullScreen) {
-                document.mozCancelFullScreen();
-            } else if (document.msExitFullscreen) {
-                document.msExitFullscreen();
-            }
-        } catch (e) {
-            console.log("Exit fullscreen error:", e);
-        }
+        toast.textContent = msg;
+        toast.style.opacity = '1';
+        setTimeout(() => {
+            if (toast) toast.style.opacity = '0';
+        }, 4500);
     };
 
     const updateFullscreenUI = () => {
@@ -137,7 +119,53 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const enterFullscreen = () => {
+        const docEl = document.documentElement;
+        const req = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
+
+        if (req) {
+            try {
+                const res = req.call(docEl);
+                if (res && res.then) {
+                    res.then(() => {
+                        updateFullscreenUI();
+                    }).catch(err => {
+                        console.warn("Fullscreen atmetimas:", err);
+                        showNotice("Naršyklė neleido įjungti viso ekrano: " + (err.message || err.name));
+                    });
+                } else {
+                    setTimeout(updateFullscreenUI, 100);
+                }
+            } catch (err) {
+                console.warn("Fullscreen išimtis:", err);
+                showNotice("Klaida jungiant pilną ekraną: " + err.message);
+            }
+        } else {
+            // Pvz., iPhone Safari naršyklė (iOS blokuoja Fullscreen API ant paprastų elementų)
+            showNotice("iPhone Safari naršyklė neleidžia keisti ekrano mygtuku. Norėdami pilno ekrano: 'Dalintis' -> 'Pridėti į pagrindinį ekraną'.");
+        }
+    };
+
+    const exitFullscreen = () => {
+        const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+        if (exit) {
+            try {
+                const res = exit.call(document);
+                if (res && res.then) {
+                    res.then(() => {
+                        updateFullscreenUI();
+                    }).catch(() => {});
+                } else {
+                    setTimeout(updateFullscreenUI, 100);
+                }
+            } catch (e) {
+                console.warn("Exit fullscreen error:", e);
+            }
+        }
+    };
+
     fullscreenBtn.addEventListener('click', (e) => {
+        e.preventDefault();
         e.stopPropagation();
         if (isFullscreen()) {
             exitFullscreen();

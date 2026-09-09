@@ -123,6 +123,11 @@ body {
 .fullscreen-btn svg {
     width: 22px;
     height: 22px;
+    pointer-events: none;
+}
+
+.fullscreen-btn path {
+    pointer-events: none;
 }
 
 /* 3. Valdiklis tiesiai ant pačios nuotraukos (overlay) */
