@@ -52,13 +52,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const idParam = urlParams.get('id');
     const id = parseInt(idParam, 10);
 
-    // 3. Validate that 'id' is an integer in the range 1–19
-    if (isNaN(id) || id < 1 || id > 19) {
+    // 3. Validate that 'id' is a valid positive integer
+    if (isNaN(id) || id < 1) {
         showFatalError("Eksponatas nerastas. Patikrinkite QR kodą.");
         return;
     }
 
-    const currentExhibit = exhibits.find(ex => ex.id === id);
+    // Randame eksponatą masyve arba dinamiškai sukuriame pagal ID (nereikia perprogramuoti didinant skaičių!)
+    const currentExhibit = exhibits.find(ex => ex.id === id) || {
+        id: id,
+        image: `images/${id}.webp`,
+        audio: `audio/${id}.mp3`,
+        alt: `Muzikanto portretas ${id}`
+    };
 
     // 4. Setup media
     exhibitImage.src = currentExhibit.image;
