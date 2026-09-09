@@ -92,21 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
     };
 
-    const showNotice = (msg) => {
-        let toast = document.getElementById('notice-toast');
-        if (!toast) {
-            toast = document.createElement('div');
-            toast.id = 'notice-toast';
-            toast.style.cssText = 'position: fixed; top: 70px; left: 50%; transform: translateX(-50%); background: rgba(20,20,20,0.92); color: #fff; padding: 10px 18px; border-radius: 8px; font-size: 0.85rem; z-index: 100; border: 1px solid rgba(255,255,255,0.25); max-width: 90%; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.6); pointer-events: none; transition: opacity 0.3s;';
-            document.body.appendChild(toast);
-        }
-        toast.textContent = msg;
-        toast.style.opacity = '1';
-        setTimeout(() => {
-            if (toast) toast.style.opacity = '0';
-        }, 4500);
-    };
-
     const updateFullscreenUI = () => {
         if (isFullscreen()) {
             iconFsEnter.classList.add('hidden');
@@ -129,21 +114,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (res && res.then) {
                     res.then(() => {
                         updateFullscreenUI();
-                    }).catch(err => {
-                        console.warn("Fullscreen atmetimas:", err);
-                        showNotice("Naršyklė neleido įjungti viso ekrano: " + (err.message || err.name));
-                    });
+                    }).catch(() => {});
                 } else {
                     setTimeout(updateFullscreenUI, 100);
                 }
-            } catch (err) {
-                console.warn("Fullscreen išimtis:", err);
-                showNotice("Klaida jungiant pilną ekraną: " + err.message);
-            }
-        } else {
-            // Pvz., iPhone Safari naršyklė (iOS blokuoja Fullscreen API ant paprastų elementų)
-            showNotice("iPhone Safari naršyklė neleidžia keisti ekrano mygtuku. Norėdami pilno ekrano: 'Dalintis' -> 'Pridėti į pagrindinį ekraną'.");
+            } catch (e) {}
         }
+        
+        // Postūmis Safari naršyklei, kad sutrauktų URL juostą
+        setTimeout(() => {
+            window.scrollTo(0, 1);
+        }, 100);
     };
 
     const exitFullscreen = () => {
@@ -158,9 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     setTimeout(updateFullscreenUI, 100);
                 }
-            } catch (e) {
-                console.warn("Exit fullscreen error:", e);
-            }
+            } catch (e) {}
         }
     };
 
@@ -177,6 +156,15 @@ document.addEventListener('DOMContentLoaded', () => {
     ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'].forEach(evt => {
         document.addEventListener(evt, updateFullscreenUI);
     });
+
+    // Orientacijos keitimo palaikymas Safari naršyklei (ypač gulsčiam režimui)
+    const handleOrientationChange = () => {
+        setTimeout(() => {
+            window.scrollTo(0, 1);
+        }, 200);
+    };
+    window.addEventListener('orientationchange', handleOrientationChange);
+    window.addEventListener('resize', handleOrientationChange);
 
     // Automatiškai bandome įjungti fullscreen ir wake lock po pirmo vartotojo paspaudimo bet kur ekrane
     let hasAttemptedAutoFullscreen = false;
