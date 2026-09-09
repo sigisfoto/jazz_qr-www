@@ -88,11 +88,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const iconFsEnter = document.getElementById('icon-fs-enter');
     const iconFsExit = document.getElementById('icon-fs-exit');
 
+    // Nustatome, ar įrenginys palaiko tikrą Fullscreen API (iPhone Safari nepalaiko)
+    const isIPhone = /iPhone|iPod/i.test(navigator.userAgent);
+    const supportsFullscreen = !isIPhone && !!(
+        document.fullscreenEnabled || 
+        document.documentElement.requestFullscreen || 
+        document.documentElement.webkitRequestFullscreen || 
+        document.documentElement.mozRequestFullScreen || 
+        document.documentElement.msRequestFullscreen
+    );
+
+    // Jei įrenginys nepalaiko (pvz. iPhone), mygtuką visiškai paslepiame, kad neklaidintų parodos lankytojų
+    if (!supportsFullscreen && fullscreenBtn) {
+        fullscreenBtn.classList.add('hidden');
+    }
+
     const isFullscreen = () => {
         return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
     };
 
     const updateFullscreenUI = () => {
+        if (!supportsFullscreen) return;
         if (isFullscreen()) {
             iconFsEnter.classList.add('hidden');
             iconFsExit.classList.remove('hidden');
